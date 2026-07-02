@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Script Dashboard</title>
+    <style>
+        body { background-color: #0d1117; color: #c9d1d9; font-family: sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .banner { width: 100%; max-width: 800px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #30363d; }
+        .container { width: 100%; max-width: 800px; background: #161b22; padding: 20px; border-radius: 6px; border: 1px solid #30363d; box-sizing: border-box; }
+        input, textarea, button { width: 100%; background: #0d1117; color: #c9d1d9; border: 1px solid #30363d; padding: 12px; margin: 8px 0; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        textarea { height: 300px; font-family: 'Courier New', Courier, monospace; resize: vertical; }
+        button { background: #238636; color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { background: #2ea043; }
+        .hidden { display: none; }
+        .nav-links { display: flex; justify-content: space-between; margin-top: 10px; }
+        .nav-links a { color: #58a6ff; text-decoration: none; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <img src="https://files.catbox.moe/s6quc6.png" alt="Banner" class="banner">
+
+    <div class="container">
+        <div id="login-box">
+            <h2>Admin Login</h2>
+            <input type="text" id="username" placeholder="Username">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="login()">Login</button>
+        </div>
+
+        <div id="editor-box" class="hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>Create/Edit Script</h2>
+                <button onclick="logout()" style="width: auto; background: #da3637; padding: 6px 12px;">Logout</button>
+            </div>
+            <input type="text" id="filename" placeholder="e.g., test.js or test-script.js">
+            <textarea id="content" placeholder="Write or paste your script/text here..."></textarea>
+            <button onclick="saveScript()">Commit & Save Changes</button>
+            
+            <div class="nav-links">
+                <a href="/public/scripts.html" target="_blank">📂 View Saved Scripts List</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // পেজ লোড হওয়ার সময় টোকেন চেক করা
+        const token = localStorage.getItem('admin_token');
+        if (token) {
+            document.getElementById('login-box').classList.add('hidden');
+            document.getElementById('editor-box').classList.remove('hidden');
+        }
+
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                localStorage.setItem('admin_token', data.token);
+                alert("Login Successful!");
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        }
+
+        async function saveScript() {
+            const filename = document.getElementById('filename').value;
+            const content = document.getElementById('content').value;
+            const token = localStorage.getItem('admin_token');
+
+            const res = await fetch('/api/scripts/save', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ filename, content })
+            });
+            const data = await res.json();
+            alert(data.message);
+            if(data.success) {
+                document.getElementById('filename').value = '';
+                document.getElementById('content').value = '';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('admin_token');
+            location.reload();
+        }
+    </script>
+</body>
+</html>
