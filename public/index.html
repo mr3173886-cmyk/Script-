@@ -5,9 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Script Dashboard</title>
     <style>
-        body { background-color: #0d1117; color: #c9d1d9; font-family: sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .banner { width: 100%; max-width: 800px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #30363d; background: #161b22; }
-        .container { width: 100%; max-width: 800px; background: #161b22; padding: 20px; border-radius: 6px; border: 1px solid #30363d; box-sizing: border-box; }
+        body { 
+            background-color: #0d1117; 
+            color: #c9d1d9; 
+            font-family: sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            position: relative;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        .banner { width: 100%; max-width: 800px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #30363d; background: #161b22; z-index: 1; }
+        .container { width: 100%; max-width: 800px; background: #161b22; padding: 20px; border-radius: 6px; border: 1px solid #30363d; box-sizing: border-box; z-index: 1; }
         input, textarea, button { width: 100%; background: #0d1117; color: #c9d1d9; border: 1px solid #30363d; padding: 12px; margin: 8px 0; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
         textarea { height: 300px; font-family: 'Courier New', Courier, monospace; resize: vertical; }
         button { background: #238636; color: white; border: none; cursor: pointer; font-weight: bold; }
@@ -15,9 +27,44 @@
         .hidden { display: none; }
         .nav-links { display: flex; justify-content: space-between; margin-top: 15px; }
         .nav-links a { color: #58a6ff; text-decoration: none; font-size: 14px; }
+
+        /* --- Snow Animation CSS --- */
+        .snow-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none; /* যাতে বাটনে বা ইনপুটে ক্লিক করতে সমস্যা না হয় */
+        }
+        .snowflake {
+            position: absolute;
+            top: -10px;
+            color: #fff;
+            font-family: serif;
+            user-select: none;
+            cursor: default;
+            animation: fall linear infinite;
+        }
+        @keyframes fall {
+            0% {
+                top: -10px;
+                transform: translateX(0);
+                opacity: 1;
+            }
+            100% {
+                top: 105vh;
+                transform: translateX(80px);
+                opacity: 0.3;
+            }
+        }
     </style>
 </head>
 <body>
+
+    <!-- তুষারপাতের কন্টেইনার -->
+    <div class="snow-container" id="snow-container"></div>
 
     <img src="https://files.catbox.moe/s6quc6.png" alt="Banner" class="banner">
 
@@ -45,6 +92,38 @@
     </div>
 
     <script>
+        // --- Snowfall Effect Logic ---
+        function createSnowflake() {
+            const snowContainer = document.getElementById('snow-container');
+            const snowflake = document.createElement('div');
+            
+            // তুষার কণার আকৃতি হিসেবে '*' বা '•' ব্যবহার করা হয়েছে
+            snowflake.innerHTML = '•'; 
+            snowflake.classList.add('snowflake');
+            
+            // র্যান্ডম সাইজ, পজিশন এবং স্পিড নির্ধারণ
+            const size = Math.random() * 15 + 5 + 'px';
+            const left = Math.random() * 100 + 'vw';
+            const duration = Math.random() * 4 + 4 + 's'; // ৪ থেকে ৮ সেকেন্ডের মধ্যে পড়বে
+            const opacity = Math.random() * 0.6 + 0.4;
+
+            snowflake.style.fontSize = size;
+            snowflake.style.left = left;
+            snowflake.style.animationDuration = duration;
+            snowflake.style.opacity = opacity;
+
+            snowContainer.appendChild(snowflake);
+
+            // অ্যানিমেশন শেষ হলে মেমোরি ক্লিয়ার করার জন্য রিমুভ করে দেওয়া
+            setTimeout(() => {
+                snowflake.remove();
+            }, parseFloat(duration) * 1000);
+        }
+
+        // প্রতি ২০০ মিলি-সেকেন্ডে একটি করে নতুন তুষার কণা তৈরি হবে
+        setInterval(createSnowflake, 200);
+
+        // --- Auth & API Logic ---
         if (localStorage.getItem('admin_token')) {
             document.getElementById('login-box').classList.add('hidden');
             document.getElementById('editor-box').classList.remove('hidden');
