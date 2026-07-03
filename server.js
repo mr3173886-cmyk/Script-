@@ -117,7 +117,7 @@ app.get('/scripts/:filename', async (req, res) => {
         if (!script) return res.status(404).send("// 404: Script not found!");
 
         // ব্যানার ইমেজ কমেন্ট হিসেবে অ্যাড করা
-        const bannerImage = `// Banner Image: https://ibb.co/6JtX4yg6.png\n\n`;
+        const bannerImage = `// Banner Image: https://files.catbox.moe/ixj7u8.jpg\n\n`;
         const finalContent = bannerImage + script.content;
 
         res.setHeader('Content-Type', 'text/plain; charset=utf-8');
